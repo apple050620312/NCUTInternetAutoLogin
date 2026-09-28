@@ -48,12 +48,6 @@ Android 開啟自動連線時會顯示連線通知，也可以直接從通知暫
 共用內容於 `Core/`，終端機版本於 `CLI/`。
 [開發與建置](docs/DEVELOPMENT.md) · [重構進度](docs/REFACTOR_PLAN.md)
 
-## Contributors
-
-- [hongfu553](https://github.com/hongfu553)
-- [AILIFE-4798](https://github.com/AILIFE-4798)
-- [ben001109](https://github.com/ben001109)
-- [rileychh](https://github.com/rileychh)
-- [lawrence717](https://github.com/lawrence717)
+作者：apple050620312。感謝 hongfu553、AILIFE-4798 與原專案貢獻者。
 
 聯絡：[Discord](https://discord.com/users/523114942434639873) · [Email](mailto:apple050620312@gmail.com)
