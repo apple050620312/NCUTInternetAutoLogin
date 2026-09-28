@@ -4,7 +4,7 @@ set -eu
 [ "$(id -u)" = 0 ] || { echo 'Run as root.' >&2; exit 1; }
 command -v uci >/dev/null || { echo 'This installer requires OpenWrt.' >&2; exit 1; }
 command -v curl >/dev/null || { echo 'Install curl and ca-bundle with opkg or apk first.' >&2; exit 1; }
-DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 [ -f "$DIR/files/ncut-autologin.sh" ] && [ -f "$DIR/files/ncut-autologin.init" ] && [ -f "$DIR/files/ncut-autologin.config" ]
 umask 077
 [ ! -x /etc/init.d/ncut-autologin ] || /etc/init.d/ncut-autologin stop

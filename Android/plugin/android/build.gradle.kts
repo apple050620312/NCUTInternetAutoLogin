@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "tw.edu.ncut.autologin.mobile"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26

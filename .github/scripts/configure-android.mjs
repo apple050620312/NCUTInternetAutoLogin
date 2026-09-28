@@ -12,6 +12,6 @@ let gradle = await readFile(gradlePath, 'utf8');
 for (const setting of ['compileSdk', 'targetSdk']) {
   const pattern = new RegExp(`(${setting}\\s*=\\s*)\\d+`);
   if (!pattern.test(gradle)) throw new Error(`Generated Android ${setting} setting is missing`);
-  gradle = gradle.replace(pattern, '${1}35');
+  gradle = gradle.replace(pattern, (_, prefix) => `${prefix}36`);
 }
 await writeFile(gradlePath, gradle);

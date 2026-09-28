@@ -17,4 +17,4 @@ release-assets/
 **/gen/android/local.properties
 **/gen/android/tauri.settings.gradle
 **/gen/android/tauri.build.gradle.kts
-
+Android/src-tauri/gen/android/

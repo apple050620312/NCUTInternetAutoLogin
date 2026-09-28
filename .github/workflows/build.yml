@@ -124,11 +124,14 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Android SDK and NDK
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108"
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;28.0.13004108"
           echo "NDK_HOME=$ANDROID_HOME/ndk/28.0.13004108" >> "$GITHUB_ENV"
       - run: npm ci
         working-directory: Android

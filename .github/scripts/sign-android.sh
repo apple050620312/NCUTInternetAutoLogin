@@ -7,8 +7,8 @@ trap 'rm -f "$keyfile"' EXIT
 printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile"
 node .github/scripts/collect-installer.mjs android
 mkdir -p release-assets
-"$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$keyfile" --ks-key-alias ncut \
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$keyfile" --ks-key-alias ncut \
     --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEYSTORE_PASSWORD \
     --out release-assets/NCUT-Android.apk .tools/unsigned-android.apk
-"$ANDROID_HOME/build-tools/35.0.0/apksigner" verify release-assets/NCUT-Android.apk
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify release-assets/NCUT-Android.apk
 rm -f .tools/unsigned-android.apk release-assets/NCUT-Android.apk.idsig
