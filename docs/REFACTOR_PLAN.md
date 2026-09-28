@@ -3,7 +3,8 @@
 ## Scope and order
 
 1. Windows desktop usability, native app and direct .exe installer.
-2. OpenWrt shell service and direct architecture-independent .ipk package.
+2. OpenWrt shell service and direct architecture-independent `.apk` and `.ipk`
+   packages for current and older OpenWrt releases.
 3. Linux desktop and direct .AppImage installer.
 4. Android Tauri app with foreground reconnect service, Keystore credentials
    and a consistently signed universal .apk.

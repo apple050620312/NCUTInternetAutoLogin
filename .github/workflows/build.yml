@@ -92,8 +92,16 @@ jobs:
             Android/test-results/
 
   openwrt:
-    name: OpenWrt installer
+    name: OpenWrt ${{ matrix.platform }} installer
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: openwrt-apk
+            arch: x86_64-25.12.0
+          - platform: openwrt-ipk
+            arch: x86_64-24.10.0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -101,19 +109,19 @@ jobs:
           node-version: 22
       - name: Prepare package feed
         run: |
-          mkdir -p .tools/openwrt-feed/ncut-autologin
-          cp -R OpenWrt/Makefile OpenWrt/files .tools/openwrt-feed/ncut-autologin/
+          mkdir -p .tools/openwrt-feed/${{ matrix.platform }}/ncut-autologin
+          cp -R OpenWrt/Makefile OpenWrt/files .tools/openwrt-feed/${{ matrix.platform }}/ncut-autologin/
       - uses: openwrt/gh-action-sdk@main
         env:
-          ARCH: x86_64-24.10.0
-          FEED_DIR: ${{ github.workspace }}/.tools/openwrt-feed
+          FEED_DIR: ${{ github.workspace }}/.tools/openwrt-feed/${{ matrix.platform }}
+          ARCH: ${{ matrix.arch }}
           PACKAGES: ncut-autologin
           NO_SHFMT_CHECK: 1
           V: s
-      - run: node .github/scripts/collect-installer.mjs openwrt
+      - run: node .github/scripts/collect-installer.mjs ${{ matrix.platform }}
       - uses: actions/upload-artifact@v4
         with:
-          name: installer-openwrt
+          name: installer-${{ matrix.platform }}
           path: release-assets/*
           if-no-files-found: error
 

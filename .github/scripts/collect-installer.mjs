@@ -6,7 +6,8 @@ const definitions = {
   windows: { root: 'target/release/bundle/nsis', suffix: '.exe', name: 'NCUT-Windows.exe' },
   macos: { root: 'target/universal-apple-darwin/release/bundle/dmg', suffix: '.dmg', name: 'NCUT-macOS.dmg' },
   linux: { root: 'target/release/bundle/appimage', suffix: '.AppImage', name: 'NCUT-Linux.AppImage' },
-  openwrt: { root: 'bin/packages', suffix: '.ipk', name: 'NCUT-OpenWrt.ipk', prefix: 'ncut-autologin_' },
+  'openwrt-apk': { root: 'bin/packages', suffix: '.apk', name: 'NCUT-OpenWrt.apk', prefix: 'ncut-autologin-' },
+  'openwrt-ipk': { root: 'bin/packages', suffix: '.ipk', name: 'NCUT-OpenWrt.ipk', prefix: 'ncut-autologin_' },
   android: { root: 'Android/src-tauri/gen/android/app/build/outputs/apk', suffix: '.apk', name: 'unsigned-android.apk', prefix: 'app-universal-release' },
 };
 const definition = definitions[platform];

@@ -2,7 +2,7 @@
 
 ## 安裝與設定
 
-1. 下載 `NCUT-OpenWrt.ipk`。
+1. 依路由器版本下載 `NCUT-OpenWrt.apk`（25.12+）或 `NCUT-OpenWrt.ipk`（24.10 及更早）。
 2. 在路由器管理頁面「系統 → 軟體」上傳並安裝。
 3. 重新登入管理頁面，開啟「網路 → 校園網路」。
 4. 填寫校園帳號與密碼，開啟「自動重新連線」，儲存並套用。
@@ -11,8 +11,11 @@
 等待時間，恢復後回到設定的檢查間隔。路由器重新開機後會繼續自動連線。
 
 安裝時如果提示缺少套件，請先安裝 `curl` 與 `ca-bundle`。
-安裝包適用於不同 CPU 架構的 OpenWrt 23.05 / 24.10 路由器。
-新版使用 apk 套件的 OpenWrt 請使用下面的本地安裝方式。
+`.apk` 安裝包適用於 OpenWrt 25.12 及之後使用 `apk` 的版本。可在 LuCI
+「系統 → 軟體」上傳；若使用 SSH，也可以執行
+`apk add --allow-untrusted ./NCUT-OpenWrt.apk`。
+
+OpenWrt 24.10 或更早版本使用 `opkg` 與 `.ipk`，請安裝對應的 `.ipk`。
 
 ## 沒有網頁管理介面的路由器
 
@@ -31,7 +34,8 @@ ncut-autologin login       # 立即登入
 logread -e ncut-autologin   # 查看紀錄
 ```
 
-本地安裝：將此目錄複製至路由器，以 root 執行 `sh install.sh`。
+本地安裝：將此目錄複製至路由器，以 root 執行 `sh install.sh`；此方式同時適用
+使用 `opkg` 或 `apk` 的版本。
 
 ## 更新與移除
 

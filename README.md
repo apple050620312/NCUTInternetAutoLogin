@@ -12,7 +12,8 @@
 | 裝置 | 下載檔案 | 安裝方式 |
 | --- | --- | --- |
 | Windows | `NCUT-Windows.exe` | 開啟檔案，依安裝精靈完成安裝 |
-| OpenWrt 路由器 | `NCUT-OpenWrt.ipk` | 在路由器「系統 → 軟體」上傳安裝 |
+| OpenWrt 路由器（25.12+） | `NCUT-OpenWrt.apk` | 在路由器「系統 → 軟體」上傳安裝 |
+| OpenWrt 路由器（24.10 或更早） | `NCUT-OpenWrt.ipk` | 在路由器「系統 → 軟體」上傳安裝 |
 | Linux | `NCUT-Linux.AppImage` | 允許檔案執行，再開啟 |
 | Android | `NCUT-Android.apk` | 開啟檔案，允許此來源安裝 |
 | macOS | `NCUT-macOS.dmg` | 開啟後將 App 拖入「應用程式」 |

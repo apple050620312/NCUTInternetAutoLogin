@@ -80,8 +80,9 @@ testing is separate and must not be inferred from fixture results.
 ## GitHub Actions and release
 
 `build.yml` builds every variant on push/PR/manual dispatch. Desktop installers
-are NSIS `.exe`, universal macOS `.dmg`, Linux `.AppImage`. OpenWrt is an `all`
-architecture `.ipk`. Android is a signed universal `.apk`.
+are NSIS `.exe`, universal macOS `.dmg`, Linux `.AppImage`. OpenWrt 25.12 is an
+`all` architecture `.apk`; the workflow also publishes an `all` architecture
+`.ipk` for OpenWrt 24.10 and earlier. Android is a signed universal `.apk`.
 
 `v*` tags publish a release only when all build/verification jobs pass.
 The release gate requires exactly five named installer files, with no archive
