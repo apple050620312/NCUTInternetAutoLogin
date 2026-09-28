@@ -85,7 +85,7 @@ are NSIS `.exe`, universal macOS `.dmg`, Linux `.AppImage`. OpenWrt 25.12 is an
 `.ipk` for OpenWrt 24.10 and earlier. Android is a signed universal `.apk`.
 
 `v*` tags publish a release only when all build/verification jobs pass.
-The release gate requires exactly five named installer files, with no archive
+The release gate requires exactly six named installer files, with no archive
 or CLI assets. CLI binaries and test screenshots stay in workflow artifacts.
 
 Android signing uses `ANDROID_KEYSTORE_BASE64` and

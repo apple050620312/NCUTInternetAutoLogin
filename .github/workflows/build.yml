@@ -170,7 +170,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Publish five installers
+    name: Publish six installers
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [desktop, openwrt, android, interface-protocol]
     runs-on: ubuntu-latest

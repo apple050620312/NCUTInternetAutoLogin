@@ -45,8 +45,8 @@ real credentials, and must not be claimed from fixture evidence.
 
 Android is now in scope. iOS is excluded. Keep the core independent from
 desktop and OS storage. Shared logo is from the user-specified AI LIFE project.
-GitHub Actions builds all installers; tag releases contain exactly five raw
-installer assets, one per platform, without archive assets. CLI builds remain
+GitHub Actions builds all installers; tag releases contain exactly six raw
+installer assets, including both OpenWrt package formats, without archive assets. CLI builds remain
 workflow artifacts. User documentation prioritizes installation and experience.
 
 ## Progress
