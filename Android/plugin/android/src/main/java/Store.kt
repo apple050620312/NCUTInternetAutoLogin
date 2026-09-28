@@ -13,6 +13,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class Store(context: Context) {
+    companion object { private val historyLock = Any() }
     private val prefs = context.getSharedPreferences("ncut", Context.MODE_PRIVATE)
     var enabled: Boolean
         get() = prefs.getBoolean("enabled", false)
@@ -47,8 +48,7 @@ class Store(context: Context) {
         val encrypted = Base64.encodeToString(cipher.iv, Base64.NO_WRAP) + ":" + Base64.encodeToString(cipher.doFinal(secret.toByteArray(Charsets.UTF_8)), Base64.NO_WRAP)
         check(prefs.edit().putString("username", username).putString("password", encrypted).putLong("interval", interval).commit()) { "設定未儲存，請稍後重試" }
     }
-    @Synchronized
-    fun record(status: String) {
+    fun record(status: String) = synchronized(historyLock) {
         val history = runCatching { JSONArray(prefs.getString("history", "[]")) }.getOrDefault(JSONArray())
         if (status != this.status) {
             history.put(JSONObject().put("at", System.currentTimeMillis() / 1000).put("status", status))
@@ -60,7 +60,7 @@ class Store(context: Context) {
         .put("enabled", enabled).put("status", status).put("hasPassword", password() != null)
         .put("history", runCatching { JSONArray(prefs.getString("history", "[]")) }.getOrDefault(JSONArray()))
     fun forget() {
-        prefs.edit().clear().commit()
+        synchronized(historyLock) { check(prefs.edit().clear().commit()) }
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
         store.deleteEntry("ncut.credentials.v1")
     }
