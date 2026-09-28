@@ -3,8 +3,6 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=ncut-autologin
 PKG_VERSION:=4.0.0
 PKG_RELEASE:=1
-PKGARCH:=all
-
 include $(INCLUDE_DIR)/package.mk
 
 define Package/ncut-autologin
@@ -12,6 +10,7 @@ define Package/ncut-autologin
   CATEGORY:=Network
   TITLE:=NCUT campus network auto login
   DEPENDS:=+curl +ca-bundle
+  PKGARCH:=all
 endef
 
 define Package/ncut-autologin/conffiles
