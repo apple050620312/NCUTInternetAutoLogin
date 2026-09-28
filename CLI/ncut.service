@@ -1,0 +1,19 @@
+[Unit]
+Description=NCUT campus network auto login
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/ncut-autologin.env
+ExecStart=/usr/local/bin/ncut run
+Restart=on-failure
+RestartSec=15
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

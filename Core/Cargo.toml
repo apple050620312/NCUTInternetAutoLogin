@@ -1,0 +1,17 @@
+[package]
+name = "ncut-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "cookies", "stream"] }
+url = "2"
+scraper = "0.24"
+regex = "1"
+
+[dev-dependencies]
+axum = "0.8"

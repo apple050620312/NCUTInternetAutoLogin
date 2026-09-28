@@ -1,0 +1,22 @@
+[package]
+name = "ncut-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "ncut_desktop_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-single-instance = "2"
+ncut-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }

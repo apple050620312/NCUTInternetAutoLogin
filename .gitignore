@@ -1,12 +1,20 @@
 OpenWrtMwan3/
+target/
+node_modules/
+dist/
+.tools/
+*.local
+test-results/
+playwright-report/
+release-assets/
+*.jks
+*.keystore
+**/gen/schemas/
+**/gen/android/.gradle/
+**/gen/android/build/
+**/gen/android/app/build/
+**/gen/android/app/src/main/jniLibs/
+**/gen/android/local.properties
+**/gen/android/tauri.settings.gradle
+**/gen/android/tauri.build.gradle.kts
 
-# Windows Installer build outputs
-Windows-Installer/Output/
-Windows-Installer/files/winsw.exe
-Windows-Installer/logs/
-Windows-Installer/*.tmp
-Windows-Installer/config.ini
-
-# PyInstaller artifacts
-Windows-Installer/build/
-Windows-Installer/NCUTAutoLogin.spec

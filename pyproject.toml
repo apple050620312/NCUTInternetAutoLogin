@@ -1,7 +1,0 @@
-[project]
-name = "ncut-internet-auto-login"
-version = "3.0.0"
-description = "勤益網路自動登入系統"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []

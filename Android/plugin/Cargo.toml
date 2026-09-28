@@ -1,0 +1,18 @@
+[package]
+name = "tauri-plugin-ncut-mobile"
+version = "0.1.0"
+authors = [ "sangege" ]
+description = ""
+edition = "2021"
+rust-version = "1.90"
+exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules"]
+links = "tauri-plugin-ncut-mobile"
+
+[dependencies]
+tauri = { version = "2.12.0" }
+serde = "1.0"
+serde_json = "1"
+thiserror = "2"
+
+[build-dependencies]
+tauri-plugin = { version = "2.7.0", features = ["build"] }

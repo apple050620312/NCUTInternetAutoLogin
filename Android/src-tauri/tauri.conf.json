@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "NCUT 校園網路",
+  "version": "4.0.0",
+  "identifier": "tw.edu.ncut.autologin.android",
+  "build": { "beforeDevCommand": "npm run dev", "devUrl": "http://localhost:1421", "beforeBuildCommand": "npm run build", "frontendDist": "../dist" },
+  "app": {
+    "windows": [{ "title": "NCUT 校園網路" }],
+    "security": { "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src ipc: http://ipc.localhost" }
+  },
+  "bundle": { "active": true, "icon": ["../../Core/assets/app-icon.png"], "android": { "minSdkVersion": 26 } }
+}

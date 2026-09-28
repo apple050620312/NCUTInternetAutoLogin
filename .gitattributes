@@ -1,3 +1,6 @@
-*.command text eol=lf #for MacOS
-*.bat text eol=crlf #for Windows
-*.py text #for all platforms
+* text=auto eol=lf
+*.command text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.rs text eol=lf
+*.yml text eol=lf

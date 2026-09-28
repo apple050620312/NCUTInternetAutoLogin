@@ -1,0 +1,6 @@
+{
+  "$schema": "../gen/schemas/mobile-schema.json",
+  "identifier": "main",
+  "windows": ["main"],
+  "permissions": ["core:default", "ncut-mobile:default"]
+}

@@ -1,0 +1,172 @@
+name: Build and verify installers
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: ${{ matrix.platform }} installer
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            args: --bundles nsis
+            targets: x86_64-pc-windows-msvc
+          - os: ubuntu-22.04
+            platform: linux
+            args: --bundles appimage
+            targets: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            platform: macos
+            args: --target universal-apple-darwin --bundles dmg
+            targets: aarch64-apple-darwin,x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Desktop/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.targets }}
+          components: clippy,rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libdbus-1-dev libssl-dev
+      - run: npm ci
+        working-directory: Desktop
+      - run: npm run build
+        working-directory: Desktop
+      - run: cargo test -p ncut-core -p ncut-cli -p ncut-desktop --locked
+      - run: cargo clippy -p ncut-core -p ncut-cli -p ncut-desktop --all-targets --locked -- -D warnings
+      - name: Build installer
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: Desktop
+          args: ${{ matrix.args }}
+      - run: node .github/scripts/collect-installer.mjs ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.platform }}
+          path: release-assets/*
+          if-no-files-found: error
+      - run: cargo build -p ncut-cli --release --locked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.platform }}
+          path: |
+            target/release/ncut
+            target/release/ncut.exe
+          if-no-files-found: error
+
+  interface-protocol:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: sudo apt-get update && sudo apt-get install -y busybox shellcheck curl
+      - run: sh -n OpenWrt/files/ncut-autologin.sh && sh -n OpenWrt/install.sh && shellcheck -s sh OpenWrt/files/ncut-autologin.sh OpenWrt/install.sh
+      - run: node --test OpenWrt/tests/portal.test.mjs
+      - run: NCUT_TEST_SHELL=busybox node --test OpenWrt/tests/portal.test.mjs
+      - run: npm ci && npx playwright install --with-deps chromium && npx playwright test
+        working-directory: Desktop
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: interface-screenshots
+          path: Desktop/test-results/
+
+  openwrt:
+    name: OpenWrt installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: x86_64-24.10.0
+          FEED_DIR: ${{ github.workspace }}/OpenWrt
+          PACKAGES: ncut-autologin
+          NO_SHFMT_CHECK: 1
+          V: s
+      - run: node .github/scripts/collect-installer.mjs openwrt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-openwrt
+          path: release-assets/*
+          if-no-files-found: error
+
+  android:
+    name: Android installer
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Android/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Android SDK and NDK
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/28.0.13004108" >> "$GITHUB_ENV"
+      - run: npm ci
+        working-directory: Android
+      - run: npm run tauri android init -- --ci
+        working-directory: Android
+      - run: node .github/scripts/configure-android.mjs
+      - run: npm run tauri android build -- --apk
+        working-directory: Android
+      - name: Sign installable APK
+        if: github.event_name != 'pull_request'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: sh .github/scripts/sign-android.sh
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: installer-android
+          path: release-assets/NCUT-Android.apk
+          if-no-files-found: error
+
+  release:
+    name: Publish five installers
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [desktop, openwrt, android, interface-protocol]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: installer-*
+          path: release-assets
+          merge-multiple: true
+      - run: node .github/scripts/check-release.mjs
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

@@ -1,0 +1,11 @@
+{
+  "ncut-autologin": {
+    "description": "Configure NCUT campus network login",
+    "read": {
+      "uci": ["ncut-autologin"],
+      "ubus": { "file": ["exec"] },
+      "file": { "/usr/bin/ncut-autologin": ["exec"] }
+    },
+    "write": { "uci": ["ncut-autologin"] }
+  }
+}
