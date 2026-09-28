@@ -1,6 +1,22 @@
 {
-  "name": "ncut-android", "version": "4.0.0", "private": true, "type": "module",
-  "scripts": { "dev": "vite --host 127.0.0.1 --port 1421 --strictPort", "build": "tsc --noEmit && vite build", "tauri": "tauri" },
-  "dependencies": { "@tauri-apps/api": "^2.8.0", "lucide": "^0.468.0" },
-  "devDependencies": { "@tauri-apps/cli": "^2.8.0", "@xmldom/xmldom": "^0.8.11", "typescript": "^5.9.2", "vite": "^7.1.0" }
+  "name": "ncut-android",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1421 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.8.0",
+    "lucide": "^0.468.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tauri-apps/cli": "^2.8.0",
+    "@xmldom/xmldom": "^0.8.11",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  }
 }

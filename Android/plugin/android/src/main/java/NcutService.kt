@@ -15,7 +15,7 @@ class NcutService : Service() {
     private lateinit var store: Store
     private val executor = Executors.newSingleThreadScheduledExecutor()
     private var job: ScheduledFuture<*>? = null
-    private var generation = 0
+    @Volatile private var generation = 0
     override fun onCreate() {
         super.onCreate()
         store = Store(this)

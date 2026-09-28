@@ -23,7 +23,12 @@ async fn execute<R: Runtime>(
         let handle = app.state::<tauri::plugin::PluginHandle<R>>();
         handle
             .run_mobile_plugin(&action, payload)
-            .map_err(|_| "操作未完成，請稍後重試".into())
+            .map_err(|error| match error {
+                tauri::plugin::mobile::PluginInvokeError::InvokeRejected(response) => response
+                    .message
+                    .unwrap_or_else(|| "操作未完成，請稍後重試".into()),
+                _ => "操作未完成，請稍後重試".into(),
+            })
     }
     #[cfg(not(target_os = "android"))]
     {

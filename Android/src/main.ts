@@ -7,6 +7,7 @@ import { statusLabels as labels, type NetworkStatus } from '../../Core/web/statu
 type Snapshot = { username: string; interval: number; enabled: boolean; status: NetworkStatus; hasPassword: boolean; history: { at: number; status: NetworkStatus }[] };
 let state: Snapshot = { username: '', interval: 30, enabled: false, status: 'stopped', hasPassword: false, history: [] };
 let busy = false;
+let requestVersion = 0;
 document.querySelector('#app')!.innerHTML = `
 <header><img class="brand-mark" src="${logo}" alt="NCUT Logo"><div><strong>NCUT 校園網路</strong><span>勤益科技大學</span></div></header>
 <main><section class="connection"><span id="status-icon"><i data-lucide="wifi"></i></span><h1 id="status" aria-live="polite"></h1><p id="detail"></p><div class="actions"><button id="connect" class="primary"><i data-lucide="play"></i>立即連線</button><button id="check" class="icon-button" title="檢查連線" aria-label="檢查連線"><i data-lucide="refresh-cw"></i></button></div></section>
@@ -27,14 +28,18 @@ function render(form = false) {
   if (form) { el<HTMLInputElement>('username').value = state.username; el<HTMLInputElement>('interval').value = String(state.interval); el<HTMLInputElement>('password').value = ''; }
   for (const id of ['save', 'connect', 'check', 'forget']) el<HTMLButtonElement>(id).disabled = busy;
   el('history').replaceChildren(...state.history.slice(-20).reverse().map(event => {
-    const row = document.createElement('li'); const text = document.createElement('span'); text.textContent = labels[event.status] || '等待網路连線'; const time = document.createElement('time'); time.textContent = new Date(event.at * 1000).toLocaleString('zh-TW', { hour12: false }); row.append(text, time); return row;
+    const row = document.createElement('li'); const text = document.createElement('span'); text.textContent = labels[event.status] || '等待網路連線'; const time = document.createElement('time'); time.textContent = new Date(event.at * 1000).toLocaleString('zh-TW', { hour12: false }); row.append(text, time); return row;
   }));
   el('empty').hidden = state.history.length > 0;
 }
 async function action(name: string, payload: Record<string, unknown> = {}, form = false, silent = false) {
   if (!isTauri()) { if (!silent) { el('notice').hidden = false; el('notice').textContent = '無法連接，請稍後重試'; } return; }
+  const version = silent ? requestVersion : ++requestVersion;
   if (!silent) { busy = true; render(); el('notice').hidden = true; }
-  try { state = await invoke<Snapshot>('plugin:ncut-mobile|execute', { action: name, payload }); render(form); }
+  try {
+    const snapshot = await invoke<Snapshot>('plugin:ncut-mobile|execute', { action: name, payload });
+    if (version === requestVersion && (!silent || !busy)) { state = snapshot; render(form); }
+  }
   catch (error) { if (!silent) { el('notice').hidden = false; el('notice').textContent = typeof error === 'string' ? error : '操作未完成，請稍後重試'; } }
   finally { if (!silent) { busy = false; render(); } }
 }
