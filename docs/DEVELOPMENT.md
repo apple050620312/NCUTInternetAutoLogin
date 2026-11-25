@@ -97,9 +97,14 @@ configured; packages use the platform's normal unsigned-app prompts.
 
 ## Protocol and migration
 
-Probe `http://www.gstatic.com/generate_204`; only 204 is online. Validate the
-NCUT title and Fortinet form; submit same-origin `4Tredir`, `magic`, `username`
-and `password` with cookies. Keepalive must be followed by a successful probe.
+The Rust core recognizes `/fgtauth?<token>` and `/login?<token>` challenges.
+A saved desktop gateway can serve a fresh form at `/login?<opaque value>` before
+Internet access is available and during an active session. The core validates
+the NCUT title and submits the form fields and cookies to the same origin.
+It visits the same-origin `/keepalive?<session>` destination once if the login
+response directs it there. Desktop schedules renewal while auto-connect is on.
+A 204 from `http://www.gstatic.com/generate_204` confirms Internet access,
+including when the gateway closes the POST without a reply.
 Gateway hostnames/public IPs are supported. HTTPS validation stays enabled.
 HTTP is the existing campus protocol and does not encrypt credentials; title
 checks alone cannot authenticate a server. Use trusted campus networks.

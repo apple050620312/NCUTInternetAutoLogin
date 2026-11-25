@@ -16,7 +16,7 @@ test('browser preview reports absent desktop connection', async ({ page }) => {
 test('desktop IPC workflow and responsive layout', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, 'isTauri', { value: true });
-    let state = { settings: { username: '', interval_seconds: 15, auto_connect: false, start_at_login: false }, status: 'stopped', history: [] as { at: number; status: string; message: string }[], has_password: false };
+    let state = { settings: { username: '', interval_seconds: 15, auto_connect: false, start_at_login: false, portal_url: '', renewal_minutes: 30 }, status: 'stopped', history: [] as { at: number; status: string; message: string }[], has_password: false };
     Object.defineProperty(window, '__TAURI_INTERNALS__', { value: {
       transformCallback: () => 1,
       invoke: async (name: string, args: { settings?: typeof state.settings; password?: string; enabled?: boolean }) => {
@@ -32,10 +32,14 @@ test('desktop IPC workflow and responsive layout', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('校園帳號').fill('s123456');
   await page.getByLabel('密碼', { exact: true }).fill('secret&+');
+  await page.getByLabel('校園入口網址（選填）').fill('http://192.0.2.1:1000/');
+  await page.getByLabel('在線續登間隔').fill('10');
   await page.getByRole('switch', { name: '自動重新連線' }).check();
   await page.getByRole('button', { name: '儲存設定' }).click();
   await expect(page.getByRole('status')).toHaveText('已儲存');
   await expect(page.getByLabel('密碼', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('校園入口網址（選填）')).toHaveValue('http://192.0.2.1:1000/');
+  await expect(page.getByLabel('在線續登間隔')).toHaveValue('10');
   await page.getByRole('button', { name: '立即連線' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('網路已連線');
   await expect(page.getByText('網路連線正常', { exact: true })).toBeVisible();

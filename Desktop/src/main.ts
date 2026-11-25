@@ -5,10 +5,22 @@ import './style.css';
 import logo from '../../Core/assets/app-icon.png';
 import { statusLabels as labels, type NetworkStatus as Status } from '../../Core/web/status';
 
-type Settings = { username: string; interval_seconds: number; auto_connect: boolean; start_at_login: boolean };
+type Settings = {
+  username: string;
+  interval_seconds: number;
+  auto_connect: boolean;
+  start_at_login: boolean;
+  portal_url: string;
+  renewal_minutes: number;
+};
 type Activity = { at: number; status: Status; message: string };
 type Snapshot = { settings: Settings; status: Status; history: Activity[]; has_password: boolean };
-let state: Snapshot = { settings: { username: '', interval_seconds: 15, auto_connect: false, start_at_login: false }, status: 'stopped', history: [], has_password: false };
+let state: Snapshot = {
+  settings: { username: '', interval_seconds: 15, auto_connect: false, start_at_login: false, portal_url: '', renewal_minutes: 30 },
+  status: 'stopped',
+  history: [],
+  has_password: false,
+};
 let busy = false;
 const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
@@ -26,7 +38,10 @@ app.innerHTML = `
           <label for="username">校園帳號</label><input id="username" name="username" autocomplete="username" placeholder="s + 學號" maxlength="256" required />
           <label for="password">密碼</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" /><button id="show-password" type="button" class="icon-button" title="顯示密碼" aria-label="顯示密碼"><i data-lucide="eye"></i></button></div>
           <div class="credential-note"><i data-lucide="shield-check"></i><span id="credential-label">密碼只保留在此裝置</span></div>
+          <label for="portal">校園入口網址（選填）</label><input id="portal" type="url" placeholder="留空時自動偵測" autocomplete="off" spellcheck="false" />
           <div class="numeric-setting"><label for="interval">檢查間隔</label><div><input id="interval" type="number" min="5" max="3600" step="1" value="15" required /><span>秒</span></div></div>
+          <div class="numeric-setting"><label for="renewal">在線續登間隔</label><div><input id="renewal" type="number" min="0" max="1440" step="1" value="30" aria-describedby="renewal-note" required /><span>分鐘</span></div></div>
+          <p class="credential-note" id="renewal-note">需填寫校園入口並開啟自動重新連線。填 0 可停用續登。</p>
           <label class="toggle-row" for="auto-connect"><span>自動重新連線</span><input id="auto-connect" type="checkbox" role="switch" /></label>
           <label class="toggle-row" for="startup"><span>登入電腦時啟動</span><input id="startup" type="checkbox" role="switch" /></label>
           <div class="save-row"><button type="submit" id="save"><i data-lucide="save"></i>儲存設定</button><span id="save-state" role="status"></span></div>
@@ -48,7 +63,9 @@ function render(updateForm = false) {
   el<HTMLInputElement>('password').placeholder = state.has_password ? '保留已儲存的密碼' : '校園網路密碼';
   if (updateForm) {
     el<HTMLInputElement>('username').value = state.settings.username;
+    el<HTMLInputElement>('portal').value = state.settings.portal_url;
     el<HTMLInputElement>('interval').value = String(state.settings.interval_seconds);
+    el<HTMLInputElement>('renewal').value = String(state.settings.renewal_minutes);
     el<HTMLInputElement>('auto-connect').checked = state.settings.auto_connect;
     el<HTMLInputElement>('startup').checked = state.settings.start_at_login;
     el<HTMLInputElement>('password').value = '';
@@ -74,7 +91,14 @@ async function command(name: string, args?: Record<string, unknown>, updateForm 
 }
 el('settings-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const settings: Settings = { username: el<HTMLInputElement>('username').value.trim(), interval_seconds: Number(el<HTMLInputElement>('interval').value), auto_connect: el<HTMLInputElement>('auto-connect').checked, start_at_login: el<HTMLInputElement>('startup').checked };
+  const settings: Settings = {
+    username: el<HTMLInputElement>('username').value.trim(),
+    portal_url: el<HTMLInputElement>('portal').value.trim(),
+    interval_seconds: Number(el<HTMLInputElement>('interval').value),
+    renewal_minutes: Number(el<HTMLInputElement>('renewal').value),
+    auto_connect: el<HTMLInputElement>('auto-connect').checked,
+    start_at_login: el<HTMLInputElement>('startup').checked,
+  };
   const password = el<HTMLInputElement>('password').value || null;
   el('save-state').textContent = '';
   await command('save_settings', { settings, password }, true);
