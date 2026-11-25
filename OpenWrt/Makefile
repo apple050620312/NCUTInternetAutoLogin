@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ncut-autologin
 PKG_VERSION:=4.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 include $(INCLUDE_DIR)/package.mk
 
 define Package/ncut-autologin

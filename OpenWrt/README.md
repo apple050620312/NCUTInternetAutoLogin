@@ -12,6 +12,10 @@
 頁面可以查看連線狀態與立即登入。預設每 15 秒檢查一次；連線失敗時會逐步延長
 等待時間，恢復後回到設定的檢查間隔。路由器重新開機後會繼續自動連線。
 
+填寫「校園入口網址」後，外網探測失敗時會直接向閘道取得新登入表單。
+自動重新連線預設每 30 分鐘在線續登，「在線續登間隔」可依網段調整，填 0 可停用續登。
+續登確認後，`logread -e ncut-autologin` 會顯示 `renewed`。
+
 安裝時如果提示缺少套件，請先安裝 `curl` 與 `ca-bundle`。
 `.apk` 安裝包適用於 OpenWrt 25.12 及之後使用 `apk` 的版本。自製套件不在
 官方信任金鑰內，因此必須使用 `--allow-untrusted`；這是 OpenWrt apk 的安全要求。
@@ -21,7 +25,8 @@ OpenWrt 24.10 或更早版本使用 `opkg` 與 `.ipk`，請安裝對應的 `.ipk
 ## 沒有網頁管理介面的路由器
 
 在 `/etc/config/ncut-autologin` 設定 `enabled '1'`、`username`、`password`
-與 `interval`，然後執行：
+與 `interval`。可用 `portal_url` 指定閘道網址，並用 `renewal_minutes` 設定續登間隔。
+完成設定後執行下列指令。
 
 ```sh
 chmod 600 /etc/config/ncut-autologin

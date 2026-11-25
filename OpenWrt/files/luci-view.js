@@ -21,6 +21,26 @@ return view.extend({
         interval.datatype = 'range(5,3600)';
         interval.default = '15';
         interval.rmempty = false;
+        var portal = section.option(form.Value, 'portal_url', '校園入口網址（選填）');
+        portal.description = '填寫所在網段的 HTTP 或 HTTPS 閘道網址，包含通訊埠。';
+        portal.validate = function(sectionId, value) {
+            if (!value) return true;
+            try {
+                var address = new URL(value);
+                if (/^https?:\/\/[^/?#]+(?:\/(?:login)?)?$/.test(value) &&
+                    !address.username && !address.password && !/\s|\\/.test(value)) {
+                    return true;
+                }
+            } catch (error) {
+                return '請填寫完整的校園閘道網址';
+            }
+            return '請填寫閘道網址，可保留結尾的 /login';
+        };
+        var renewal = section.option(form.Value, 'renewal_minutes', '在線續登間隔（分鐘）');
+        renewal.datatype = 'range(0,1440)';
+        renewal.default = '30';
+        renewal.rmempty = false;
+        renewal.description = '填寫入口網址並啟用自動重新連線後生效。填 0 可停用續登。';
         var status = E('span', {}, '正在檢查連線');
         var labels = { online: '網路已連線', needs_login: '等待校園登入', unstable: '等待網路連線', missing_credentials: '尚未設定帳號', login_failed: '登入未完成' };
         function check(command) {
