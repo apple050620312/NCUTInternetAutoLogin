@@ -5,12 +5,14 @@ import { mkdir, mkdtemp, writeFile, chmod, rm, readFile } from 'node:fs/promises
 import { tmpdir } from 'node:os';
 import { join, delimiter } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 
 const script = fileURLToPath(new URL('../files/ncut-autologin.sh', import.meta.url));
 const windows = process.platform === 'win32';
 const busybox = process.env.NCUT_TEST_SHELL === 'busybox';
-const shell = busybox ? 'busybox' : windows ? 'C:/Program Files/Git/bin/sh.exe' : '/bin/sh';
+const shell = busybox
+  ? execFileSync('/bin/sh', ['-c', 'command -v busybox'], { encoding: 'utf8' }).trim()
+  : windows ? 'C:/Program Files/Git/bin/sh.exe' : '/bin/sh';
 const username = 's+中文&= 123';
 const password = 'secret&=+"\'\\ 密碼';
 
@@ -19,6 +21,24 @@ async function putScript(bin, name, source) {
   await writeFile(path, '#!/bin/sh\n' + source + '\n');
   await chmod(path, 0o755);
 }
+
+// Functions take precedence over built-in applets on BusyBox versions that
+// run sleep directly. All requests and portal parsing still use the real commands.
+const monitorSetup = String.raw`
+cut() { cat "$TEST_CLOCK"; }
+logger() { :; }
+sleep() {
+  now=$(cat "$TEST_CLOCK")
+  if [ "$now" -ge "$TEST_STOP" ]; then
+    kill -TERM "$$"
+    return
+  fi
+  printf '%s\n' "$1" >> "$TEST_DELAYS"
+  printf '%s\n' "$((now + $1))" > "$TEST_CLOCK"
+}
+script=$1
+shift
+. "$script"`;
 
 async function fixture(mode, operation = 'login', options = {}) {
   let online = ['online', 'monitor', 'disabled', 'unconfirmed'].includes(mode);
@@ -48,7 +68,7 @@ esac`);
   if (busybox) {
     const applets = join(work, 'applets');
     await mkdir(applets);
-    const result = spawnSync('busybox', ['--install', '-s', applets]);
+    const result = spawnSync(shell, ['--install', '-s', applets]);
     assert.equal(result.status, 0, result.stderr.toString());
     paths.push(applets);
   }
@@ -61,16 +81,6 @@ esac`);
   if (operation === 'run') {
     await writeFile(clock, '0\n');
     await writeFile(delays, '');
-    await putScript(bin, 'cut', 'cat "$TEST_CLOCK"');
-    await putScript(bin, 'logger', 'exit 0');
-    await putScript(bin, 'sleep', String.raw`
-now=$(cat "$TEST_CLOCK")
-if [ "$now" -ge "$TEST_STOP" ]; then
-    kill -TERM "$PPID"
-    exit 0
-fi
-printf '%s\n' "$1" >> "$TEST_DELAYS"
-printf '%s\n' "$((now + $1))" > "$TEST_CLOCK"`);
   }
 
   const server = http.createServer(async (request, response) => {
@@ -183,9 +193,12 @@ printf '%s\n' "$((now + $1))" > "$TEST_CLOCK"`);
     };
     const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path') || 'PATH';
     env[pathKey] = [...paths, env[pathKey]].join(delimiter);
-    const args = [script, operation];
+    const pathSetup = windows ? 'export PATH="$(cygpath -u "$NCUT_TEST_BIN"):$PATH"\n' : '';
+    const setup = operation === 'run' ? monitorSetup : 'exec /bin/sh "$@"';
+    const args = operation === 'run' || windows
+      ? ['-c', pathSetup + setup, 'fixture', posix(script), operation]
+      : [script, operation];
     if (busybox) args.unshift('sh');
-    if (windows) args.unshift('-c', 'export PATH="$(cygpath -u "$NCUT_TEST_BIN"):$PATH"; exec /bin/sh "$@"', 'fixture');
     const child = spawn(shell, args, { env, windowsHide: true });
     const timer = setTimeout(() => child.kill(), 40_000);
     try {

@@ -43,7 +43,9 @@ origin() {
     authority=${authority%%[/?#]*}
     case "$authority" in ''|*@*|*%*) return 1 ;; esac
     case "$1" in http://*) authority=${authority%:80} ;; https://*) authority=${authority%:443} ;; esac
-    printf '%s://%s\n' "${1%%://*}" "$authority" | tr '[:upper:]' '[:lower:]'
+    # URL authorities use ASCII case folding. BusyBox 1.30 misaligns tr's case classes.
+    # shellcheck disable=SC2018,SC2019
+    printf '%s://%s\n' "${1%%://*}" "$authority" | tr 'A-Z' 'a-z'
 }
 
 url_path() {
