@@ -109,31 +109,33 @@ attribute() {
 parse_form() {
     [ "$(origin "$EFFECTIVE")" = "$1" ] || return 1
     case "$HTTP_CODE" in 2??) ;; *) return 1 ;; esac
-    tr '\r\n' '  ' < "$WORK/page" | grep -qiE '<title[^>]*>[^<]*勤益科技大學' || return 1
-    # Pick the form containing both credential fields, then read its hidden values.
-    tr '\r\n' '  ' < "$WORK/page" | sed 's/</\n</g' | awk '
+    # The portal form uses quoted attributes. Split the HTML into tags so wrapped
+    # attributes work across BusyBox and other awk implementations.
+    awk -v RS='<' -v apostrophe="'" '
         {
+            gsub(/[\r\n]/, " ")
             tag = tolower($0)
-            if (tag ~ /^<form[[:space:]>]/) {
+            if (tag ~ /^title[[:space:]>]/ &&
+                index(substr($0, index($0, ">") + 1), "勤益科技大學")) ncut = 1
+            if (tag ~ /^form[[:space:]>]/) {
                 in_form = 1
                 form = ""
                 account = secret = 0
             }
             if (!in_form) next
-            form = form $0 "\n"
-            if (tag ~ /^<input[[:space:]]/) {
-                if (tag ~ /[[:space:]]name[[:space:]]*=[[:space:]]*["\047]username["\047]/) account = 1
-                if (tag ~ /[[:space:]]name[[:space:]]*=[[:space:]]*["\047]password["\047]/) secret = 1
+            form = form "<" $0 "\n"
+            if (tag ~ /^input[[:space:]]/) {
+                gsub(apostrophe, "\"", tag)
+                if (tag ~ /[[:space:]]name[[:space:]]*=[[:space:]]*"username"/) account = 1
+                if (tag ~ /[[:space:]]name[[:space:]]*=[[:space:]]*"password"/) secret = 1
             }
-            if (tag ~ /^<\/form[[:space:]>]/) {
-                if (account && secret) {
-                    printf "%s", form
-                    exit
-                }
+            if (tag ~ /^\/form[[:space:]>]/) {
+                if (account && secret && !login) login = form
                 in_form = 0
             }
         }
-    ' > "$WORK/form"
+        END { if (ncut && login) printf "%s", login }
+    ' "$WORK/page" > "$WORK/form"
     [ -s "$WORK/form" ] || return 1
     FORM_URL=$EFFECTIVE
     MAGIC=$(grep -iE "^<input.*[[:space:]]name[[:space:]]*=[[:space:]]*['\"]magic['\"]" "$WORK/form" | attribute value)
